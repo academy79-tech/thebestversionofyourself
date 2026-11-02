@@ -1,0 +1,937 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>The Best Version of Yourself — Telegram Mini App</title>
+    <!-- Telegram WebApp SDK -->
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        :root {
+            --bg-color: var(--tg-theme-bg-color, #f8fafc);
+            --text-color: var(--tg-theme-text-color, #0f172a);
+            --secondary-text: var(--tg-theme-hint-color, #475569);
+            --primary-color: #0f766e;
+            --primary-light: #ccfbf1;
+            --telegram-blue: #0088cc;
+            --card-bg: var(--tg-theme-secondary-bg-color, #ffffff);
+            --border-color: #e2e8f0;
+            --warning-bg: #fffbeb;
+            --warning-border: #fde68a;
+            --warning-text: #92400e;
+            --danger-bg: #fef2f2;
+            --danger-text: #991b1b;
+            --radius: 14px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            padding-bottom: 85px;
+            overflow-x: hidden;
+        }
+
+        /* Header */
+        .app-header {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: var(--card-bg);
+            border-bottom: 1px solid var(--border-color);
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        .header-title-box h1 {
+            font-size: 17px;
+            font-weight: 700;
+            color: var(--text-color);
+        }
+
+        .header-title-box p {
+            font-size: 11px;
+            color: var(--secondary-text);
+            margin-top: 2px;
+        }
+
+        .tma-badge {
+            background: #e0f2fe;
+            color: var(--telegram-blue);
+            font-size: 11px;
+            font-weight: 700;
+            padding: 4px 8px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        /* Container & Tabs */
+        .container {
+            padding: 16px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.25s ease-in-out;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(4px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Cards */
+        .card {
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            padding: 16px;
+            margin-bottom: 14px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+        }
+
+        .hero-card {
+            background: linear-gradient(135deg, #ccfbf1 0%, #e0f2fe 100%);
+            border: none;
+        }
+
+        .hero-card h2 {
+            color: #0f766e;
+            font-size: 20px;
+            font-weight: 800;
+            margin-bottom: 6px;
+        }
+
+        .hero-card p {
+            font-size: 13px;
+            color: #115e59;
+            line-height: 1.45;
+        }
+
+        /* Warning Banners */
+        .disclaimer-banner {
+            background-color: var(--warning-bg);
+            border: 1px solid var(--warning-border);
+            color: var(--warning-text);
+            padding: 12px;
+            border-radius: 12px;
+            margin-bottom: 14px;
+            font-size: 12px;
+            line-height: 1.45;
+        }
+
+        .disclaimer-banner strong {
+            display: block;
+            margin-bottom: 2px;
+            font-size: 13px;
+        }
+
+        /* Section Item Buttons */
+        .section-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px;
+            background: var(--card-bg);
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: background 0.15s;
+        }
+
+        .section-item:active {
+            background: rgba(0,0,0,0.03);
+        }
+
+        .icon-box {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            flex-shrink: 0;
+        }
+
+        .item-info {
+            flex: 1;
+        }
+
+        .item-info h3 {
+            font-size: 15px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .item-info p {
+            font-size: 12px;
+            color: var(--secondary-text);
+            margin-top: 2px;
+            line-height: 1.35;
+        }
+
+        .badge {
+            font-size: 10px;
+            padding: 2px 6px;
+            background: #e2e8f0;
+            color: #475569;
+            border-radius: 4px;
+        }
+
+        /* Form Controls */
+        .form-group {
+            margin-bottom: 12px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 12px;
+            font-weight: 700;
+            margin-bottom: 4px;
+            color: var(--text-color);
+        }
+
+        .form-control, select {
+            width: 100%;
+            padding: 10px 12px;
+            font-size: 14px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            background: var(--card-bg);
+            color: var(--text-color);
+            outline: none;
+        }
+
+        .gender-selector {
+            display: flex;
+            gap: 8px;
+        }
+
+        .gender-btn {
+            flex: 1;
+            padding: 10px;
+            text-align: center;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+            background: var(--card-bg);
+        }
+
+        .gender-btn.active {
+            background: var(--primary-color);
+            color: #ffffff;
+            border-color: var(--primary-color);
+        }
+
+        /* Buttons */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            padding: 12px;
+            font-size: 14px;
+            font-weight: 700;
+            border-radius: 10px;
+            border: none;
+            cursor: pointer;
+            text-decoration: none;
+            gap: 6px;
+            transition: opacity 0.15s;
+        }
+
+        .btn:active {
+            opacity: 0.85;
+        }
+
+        .btn-primary { background: var(--primary-color); color: #ffffff; }
+        .btn-telegram { background: var(--telegram-blue); color: #ffffff; }
+        .btn-purple { background: #6b21a8; color: #ffffff; }
+        .btn-outline { background: transparent; border: 1px solid var(--border-color); color: var(--text-color); }
+
+        /* Typography Lists */
+        ul.custom-list {
+            list-style: none;
+            margin: 10px 0;
+        }
+
+        ul.custom-list li {
+            position: relative;
+            padding-left: 20px;
+            font-size: 13px;
+            color: var(--secondary-text);
+            margin-bottom: 6px;
+            line-height: 1.4;
+        }
+
+        ul.custom-list li::before {
+            content: "•";
+            color: var(--primary-color);
+            font-weight: bold;
+            font-size: 16px;
+            position: absolute;
+            left: 4px;
+            top: -2px;
+        }
+
+        /* Bottom Nav */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: var(--card-bg);
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-around;
+            padding: 6px 0;
+            z-index: 1000;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: var(--secondary-text);
+            font-size: 9px;
+            text-decoration: none;
+            padding: 4px 6px;
+            border: none;
+            background: none;
+            cursor: pointer;
+        }
+
+        .nav-item.active {
+            color: var(--primary-color);
+            font-weight: bold;
+        }
+
+        .nav-icon {
+            font-size: 17px;
+            margin-bottom: 2px;
+        }
+
+        /* Modal */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal-box {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 20px;
+            max-width: 400px;
+            width: 100%;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        }
+
+        .modal-box h3 {
+            font-size: 16px;
+            margin-bottom: 8px;
+        }
+
+        .modal-box p {
+            font-size: 13px;
+            color: var(--secondary-text);
+            line-height: 1.45;
+            margin-bottom: 16px;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .macro-row {
+            display: flex;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .macro-box {
+            flex: 1;
+            padding: 10px;
+            border-radius: 10px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- App Top Bar -->
+    <header class="app-header">
+        <div class="header-title-box">
+            <h1>The Best Version of Yourself</h1>
+            <p>Питание, тренировки и привычки для устойчивого прогресса</p>
+        </div>
+        <div class="tma-badge">
+            <span>✈️ Mini App</span>
+        </div>
+    </header>
+
+    <div class="container">
+
+        <!-- TAB 1: HOME -->
+        <div id="tab-home" class="tab-content active">
+            <div class="card hero-card">
+                <h2>Добро пожаловать!</h2>
+                <p>Ваш персональный гид по правильному питанию, эффективным тренировкам и устойчивым здоровым привычкам.</p>
+            </div>
+
+            <div class="disclaimer-banner">
+                <strong>⚠️ Медицинское предупреждение</strong>
+                Информация носит исключительно ознакомительный характер. При наличии заболеваний, беременности, приёме лекарств или сомнениях обязательно проконсультируйтесь с квалифицированным врачом.
+            </div>
+
+            <h3 style="margin: 12px 0 8px 0; font-size: 16px;">Разделы приложения</h3>
+
+            <div class="section-item" onclick="switchTab('weightloss')">
+                <div class="icon-box" style="background:#e0f2fe; color:#0088cc;">🏋️</div>
+                <div class="item-info">
+                    <h3>1. Правильное похудение <span class="badge">Статья</span></h3>
+                    <p>Сохранение мышц и упругости кожи. Белок, тренировки и темп.</p>
+                </div>
+                <span>➔</span>
+            </div>
+
+            <div class="section-item" onclick="switchTab('calculator')">
+                <div class="icon-box" style="background:#dcfce7; color:#15803d;">🧮</div>
+                <div class="item-info">
+                    <h3>2. Калькулятор калорий <span class="badge">Инструмент</span></h3>
+                    <p>Встроенный расчёт калорийности, BMR, TDEE и баланса БЖУ.</p>
+                </div>
+                <span>➔</span>
+            </div>
+
+            <div class="section-item" onclick="switchTab('medications')">
+                <div class="icon-box" style="background:#fef3c7; color:#b45309;">💊</div>
+                <div class="item-info">
+                    <h3>3. Информация о препаратах <span class="badge">Справочник</span></h3>
+                    <p>Информация о Retatrutide и Tirzepatide. Ссылки, риски и статусы.</p>
+                </div>
+                <span>➔</span>
+            </div>
+
+            <div class="section-item" onclick="switchTab('peptides')">
+                <div class="icon-box" style="background:#f3e8ff; color:#6b21a8;">🧪</div>
+                <div class="item-info">
+                    <h3>4. Калькулятор пептидов <span class="badge">Инструмент</span></h3>
+                    <p>Встроенный расчёт раствора и делений шприца U-100 / U-40.</p>
+                </div>
+                <span>➔</span>
+            </div>
+
+            <div class="section-item" onclick="switchTab('consultation')">
+                <div class="icon-box" style="background:#e0f2fe; color:#0088cc;">💬</div>
+                <div class="item-info">
+                    <h3>5. Консультация специалиста <span class="badge">Telegram</span></h3>
+                    <p>Обсудите свой случай со специалистом: питание, тренировки, анализы.</p>
+                </div>
+                <span>➔</span>
+            </div>
+
+            <div class="section-item" onclick="switchTab('workouts')">
+                <div class="icon-box" style="background:#ccfbf1; color:#0f766e;">🏃</div>
+                <div class="item-info">
+                    <h3>6. Тренировки (Smart GYM) <span class="badge">Бот</span></h3>
+                    <p>Перейдите в Smart GYM — приложение с тренировками.</p>
+                </div>
+                <span>➔</span>
+            </div>
+        </div>
+
+        <!-- TAB 2: WEIGHT LOSS -->
+        <div id="tab-weightloss" class="tab-content">
+            <button class="btn btn-outline" style="margin-bottom:12px; width:auto; padding:6px 12px; font-size:12px;" onclick="switchTab('home')">← На главную</button>
+
+            <div class="card hero-card">
+                <h2>Правильное похудение</h2>
+                <p>Как худеть с сохранением мышц и упругости кожи для долгосрочного результата.</p>
+            </div>
+
+            <div class="card">
+                <h3 style="font-size:16px; margin-bottom:8px;">Как худеть, сохраняя мышцы</h3>
+                <p style="font-size:13px; font-weight:600; color:var(--text-color);">1. Умеренный дефицит калорий</p>
+                <p style="font-size:13px; color:var(--secondary-text); margin-top:4px;">
+                    Ориентир: 10–20% от поддерживающей калорийности. Помните, что расчёт является приблизительным.
+                </p>
+
+                <p style="font-size:13px; font-weight:600; color:var(--text-color); margin-top:12px;">2. Белок в рационе</p>
+                <p style="font-size:13px; color:var(--secondary-text); margin-top:4px;">
+                    Ориентир: 1,6–2,2 г на кг массы тела в сутки для здоровых взрослых. Распределяйте белок на несколько приёмов пищи.
+                </p>
+                <p style="font-size:12px; font-weight:700; margin-top:6px;">Источники белка:</p>
+                <ul class="custom-list">
+                    <li>Птица, нежирное мясо, рыба и морепродукты</li>
+                    <li>Яйца, творог и нежирные молочные продукты</li>
+                    <li>Чечевица, нут, фасоль и тофу</li>
+                </ul>
+
+                <p style="font-size:13px; font-weight:600; color:var(--text-color); margin-top:12px;">3. Силовые тренировки</p>
+                <p style="font-size:13px; color:var(--secondary-text); margin-top:4px;">
+                    Занимайтесь 2–3 раза в неделю с постепенным увеличением или поддержанием нагрузки.
+                </p>
+
+                <p style="font-size:13px; font-weight:600; color:var(--text-color); margin-top:12px;">4. Индивидуальный темп</p>
+                <p style="font-size:13px; color:var(--secondary-text); margin-top:4px;">
+                    Ориентир: 0,25–1% массы тела в неделю. Более медленный темп может быть гораздо более уместен.
+                </p>
+            </div>
+
+            <div class="card" style="background:#0f766e; color:#ffffff;">
+                <h3 style="font-size:16px; margin-bottom:6px;">Встроенный калькулятор калорий</h3>
+                <p style="font-size:12px; opacity:0.9; margin-bottom:12px;">Рассчитайте свою суточную норму калорий и БЖУ прямо в приложении.</p>
+                <button class="btn" style="background:#ffffff; color:#0f766e;" onclick="switchTab('calculator')">Рассчитать калорийность ⚡</button>
+            </div>
+
+            <div class="card">
+                <h3 style="font-size:16px; margin-bottom:8px;">Как поддерживать здоровье кожи</h3>
+                <p style="font-size:13px; color:var(--secondary-text); margin-bottom:8px;">
+                    Вода, витамины или отдельные продукты не гарантируют предотвращение обвисания кожи. Эластичность зависит от возраста, генетики, объема и скорости снижения веса.
+                </p>
+                <ul class="custom-list">
+                    <li>Полноценное питание и достаточное поступление белка и жиров</li>
+                    <li>Овощи, фрукты и достаточный сон</li>
+                    <li>Постепенное снижение веса без экстремальных диет</li>
+                </ul>
+                <p style="font-size:12px; color:var(--secondary-text); background:#f1f5f9; padding:8px; border-radius:8px; margin-top:8px;">
+                    При выраженных изменениях кожи рекомендуется обратиться к врачу.
+                </p>
+            </div>
+        </div>
+
+        <!-- TAB 3: IN-APP CALORIE CALCULATOR -->
+        <div id="tab-calculator" class="tab-content">
+            <button class="btn btn-outline" style="margin-bottom:12px; width:auto; padding:6px 12px; font-size:12px;" onclick="switchTab('home')">← На главную</button>
+
+            <div class="card hero-card">
+                <h2>Калькулятор калорий и БЖУ</h2>
+                <p>Персональный расчёт BMR, TDEE и баланса нутриентов.</p>
+            </div>
+
+            <div class="card">
+                <div class="form-group">
+                    <label>Пол</label>
+                    <div class="gender-selector">
+                        <div class="gender-btn active" id="g-female" onclick="setGender('female')">Женский</div>
+                        <div class="gender-btn" id="g-male" onclick="setGender('male')">Мужской</div>
+                    </div>
+                </div>
+
+                <div style="display:flex; gap:10px;">
+                    <div class="form-group" style="flex:1;">
+                        <label for="calc-age">Возраст (лет)</label>
+                        <input type="number" id="calc-age" class="form-control" value="30" oninput="calculateInAppCalories()">
+                    </div>
+                    <div class="form-group" style="flex:1;">
+                        <label for="calc-weight">Вес (кг)</label>
+                        <input type="number" id="calc-weight" class="form-control" value="65" oninput="calculateInAppCalories()">
+                    </div>
+                    <div class="form-group" style="flex:1;">
+                        <label for="calc-height">Рост (см)</label>
+                        <input type="number" id="calc-height" class="form-control" value="168" oninput="calculateInAppCalories()">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="calc-activity">Уровень активности</label>
+                    <select id="calc-activity" onchange="calculateInAppCalories()">
+                        <option value="1.2">Сидячий образ жизни (минимальная)</option>
+                        <option value="1.375">Легкая активность (1-3 тренировки/неделя)</option>
+                        <option value="1.55" selected>Умеренная активность (3-5 тренировок/неделя)</option>
+                        <option value="1.725">Высокая активность (6-7 тренировок/неделя)</option>
+                        <option value="1.9">Экстремальная (тяжелый труд / 2 раза в день)</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="calc-goal">Цель</label>
+                    <select id="calc-goal" onchange="calculateInAppCalories()">
+                        <option value="0.85" selected>Умеренный дефицит (-15%) — сохранение мышц</option>
+                        <option value="0.90">Мягкий дефицит (-10%) — плавное похудение</option>
+                        <option value="1.00">Поддержание веса (100% TDEE)</option>
+                        <option value="1.10">Набор массы (+10%)</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="card" style="background:#0f766e; color:#ffffff; text-align:center;">
+                <p style="font-size:12px; opacity:0.85;">Суточная норма для вашей цели:</p>
+                <h2 id="res-target" style="font-size:32px; font-weight:800; margin:4px 0;">-- ккал</h2>
+                <div style="display:flex; justify-content:space-around; background:rgba(255,255,255,0.15); padding:8px; border-radius:8px; margin-top:10px; font-size:12px;">
+                    <div>BMR (Базовый): <strong id="res-bmr">--</strong></div>
+                    <div>TDEE (Поддержание): <strong id="res-tdee">--</strong></div>
+                </div>
+
+                <div class="macro-row">
+                    <div class="macro-box" style="background:#e0f2fe; color:#0369a1;">
+                        <div style="font-size:11px; font-weight:700;">Белки</div>
+                        <div id="res-prot" style="font-size:16px; font-weight:800;">-- г</div>
+                        <div id="res-prot-k" style="font-size:10px;">-- ккал</div>
+                    </div>
+                    <div class="macro-box" style="background:#fef3c7; color:#b45309;">
+                        <div style="font-size:11px; font-weight:700;">Жиры</div>
+                        <div id="res-fat" style="font-size:16px; font-weight:800;">-- г</div>
+                        <div id="res-fat-k" style="font-size:10px;">-- ккал</div>
+                    </div>
+                    <div class="macro-box" style="background:#dcfce7; color:#15803d;">
+                        <div style="font-size:11px; font-weight:700;">Углеводы</div>
+                        <div id="res-carb" style="font-size:16px; font-weight:800;">-- г</div>
+                        <div id="res-carb-k" style="font-size:10px;">-- ккал</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="disclaimer-banner">
+                <strong>💡 Памятка по калориям</strong>
+                Все значения являются индивидуально-ориентировочными. Регулируйте калорийность по результатам 2-3 недель наблюдений за весом и самочувствием.
+            </div>
+        </div>
+
+        <!-- TAB 4: MEDICATIONS -->
+        <div id="tab-medications" class="tab-content">
+            <button class="btn btn-outline" style="margin-bottom:12px; width:auto; padding:6px 12px; font-size:12px;" onclick="switchTab('home')">← На главную</button>
+
+            <div class="disclaimer-banner" style="background:#fef2f2; border-color:#fecaca; color:#991b1b;">
+                <strong>⚠️ Важное медицинское предупреждение</strong>
+                Препараты не являются обычными пептидами для самостоятельного похудения. В приложении не даются схемы лечения, дозировки, рекомендации по покупке, разведению, хранению или инъекциям.
+            </div>
+
+            <div class="card">
+                <h3 style="font-size:17px; margin-bottom:4px;">Retatrutide (Ретатрутид)</h3>
+                <p style="font-size:12px; color:var(--secondary-text); margin-bottom:10px;">Исследуемый тройной агонист рецепторов</p>
+                <p style="font-size:13px; color:var(--text-color); margin-bottom:10px;">
+                    Это медицинский препарат / исследуемое вещество. Статус и доступность зависят от страны и могут меняться со временем.
+                </p>
+                <div style="background:#f8fafc; border:1px solid #e2e8f0; padding:10px; border-radius:8px; font-size:12px; font-weight:700; color:#334155; margin-bottom:8px;">
+                    Актуальный статус препарата уточните у врача и национального регулятора.
+                </div>
+                <div style="background:#fef2f2; padding:10px; border-radius:8px; font-size:12px; color:#991b1b; margin-bottom:12px;">
+                    Предупреждение: покупка неофициальных субстанций из несогласованных источников сопряжена с риском подделок и вреда здоровью.
+                </div>
+                <button class="btn btn-outline" style="margin-bottom:8px;" onclick="openLinkModal('https://activecode.kz/product/retatrutide-10mg', 'Ссылка на Retatrutide 10mg')">
+                    Ссылка на Retatrutide 10mg ↗️
+                </button>
+                <button class="btn btn-telegram" onclick="switchTab('consultation')">Обсудить со специалистом</button>
+            </div>
+
+            <div class="card">
+                <h3 style="font-size:17px; margin-bottom:4px;">Tirzepatide (Тирзепатид)</h3>
+                <p style="font-size:12px; color:var(--secondary-text); margin-bottom:10px;">Двойной агонист рецепторов GIP и GLP-1</p>
+                <p style="font-size:13px; color:var(--text-color); margin-bottom:10px;">
+                    Медицинский препарат. Законодательный статус и порядок отпуска варьируются в зависимости от страны.
+                </p>
+                <div style="background:#f8fafc; border:1px solid #e2e8f0; padding:10px; border-radius:8px; font-size:12px; font-weight:700; color:#334155; margin-bottom:8px;">
+                    Актуальный статус препарата уточните у врача и национального регулятора.
+                </div>
+                <div style="background:#fef2f2; padding:10px; border-radius:8px; font-size:12px; color:#991b1b; margin-bottom:12px;">
+                    Предупреждение: приобретение без рецепта или из неофициальных источников влечет риск получения опасной продукции.
+                </div>
+                <button class="btn btn-outline" style="margin-bottom:8px;" onclick="openLinkModal('https://activecode.kz/product/tirzepatide-10mg', 'Ссылка на Tirzepatide 10mg')">
+                    Ссылка на Tirzepatide 10mg ↗️
+                </button>
+                <button class="btn btn-telegram" onclick="switchTab('consultation')">Обсудить со специалистом</button>
+            </div>
+        </div>
+
+        <!-- TAB 5: IN-APP PEPTIDE CALCULATOR -->
+        <div id="tab-peptides" class="tab-content">
+            <button class="btn btn-outline" style="margin-bottom:12px; width:auto; padding:6px 12px; font-size:12px;" onclick="switchTab('home')">← На главную</button>
+
+            <div class="card hero-card" style="background:#f3e8ff;">
+                <h2 style="color:#6b21a8;">Калькулятор пептидов</h2>
+                <p style="color:#581c87;">Встроенный математический калькулятор концентрации раствора и делений шприца.</p>
+            </div>
+
+            <div class="disclaimer-banner">
+                <strong>⚠️ Медицинское предупреждение</strong>
+                Данный калькулятор носит исключительно математическо-справочный характер для расчёта объема раствора. Калькулятор не подтверждает безопасность, качество или назначение препарата. Не используйте его для самостоятельного выбора дозы или инъекций. Следуйте назначениям врача и инструкции к зарегистрированному препарату.
+            </div>
+
+            <div class="card">
+                <div class="form-group">
+                    <label for="pep-vial">Содержимое флакона (мг)</label>
+                    <input type="number" id="pep-vial" class="form-control" value="10" oninput="calculatePeptides()">
+                </div>
+
+                <div class="form-group">
+                    <label for="pep-water">Добавлено растворителя (мл)</label>
+                    <input type="number" id="pep-water" class="form-control" value="2" oninput="calculatePeptides()">
+                </div>
+
+                <div class="form-group">
+                    <label for="pep-dose">Разовая доза (мг)</label>
+                    <input type="number" id="pep-dose" class="form-control" value="2" oninput="calculatePeptides()">
+                </div>
+
+                <div class="form-group">
+                    <label for="pep-syringe">Тип инсулинового шприца</label>
+                    <select id="pep-syringe" onchange="calculatePeptides()">
+                        <option value="100" selected>Шприц U-100 (100 ед. = 1 мл)</option>
+                        <option value="40">Шприц U-40 (40 ед. = 1 мл)</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="card" style="background:#6b21a8; color:#ffffff; text-align:center;">
+                <p style="font-size:12px; opacity:0.85;">Делений на шприце на 1 дозу:</p>
+                <h2 id="pep-res-units" style="font-size:32px; font-weight:800; margin:4px 0;">-- ед.</h2>
+                <p id="pep-res-vol" style="font-size:13px; opacity:0.9;">Объём раствора: -- мл</p>
+
+                <div style="display:flex; justify-content:space-around; background:rgba(255,255,255,0.15); padding:8px; border-radius:8px; margin-top:12px; font-size:12px;">
+                    <div>Концентрация: <strong id="pep-res-conc">-- мг/мл</strong></div>
+                    <div>Шприц: <strong id="pep-res-type">U-100</strong></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 6: CONSULTATION -->
+        <div id="tab-consultation" class="tab-content">
+            <button class="btn btn-outline" style="margin-bottom:12px; width:auto; padding:6px 12px; font-size:12px;" onclick="switchTab('home')">← На главную</button>
+
+            <div class="card hero-card" style="background:#e0f2fe;">
+                <h2 style="color:#0369a1;">Хотите разобраться, что подойдёт именно вам?</h2>
+                <p style="color:#075985;">
+                    Обсудите свой случай со специалистом: питание, тренировки, анализы и витамины. Решения о лекарствах и интерпретации анализов принимайте вместе с квалифицированным медицинским специалистом.
+                </p>
+            </div>
+
+            <div class="card" style="background:var(--telegram-blue); color:#ffffff;">
+                <h3 style="font-size:18px; margin-bottom:6px;">Связь со специалистом</h3>
+                <p style="font-size:13px; opacity:0.9; margin-bottom:14px;">Напишите в Telegram для обсуждения вопросов питания и тренировок.</p>
+                <button class="btn" style="background:#ffffff; color:var(--telegram-blue);" onclick="openLinkModal('https://t.me/bestrong79', 'Написать специалисту в Telegram')">
+                    Написать специалисту ✈️
+                </button>
+            </div>
+        </div>
+
+        <!-- TAB 7: WORKOUTS -->
+        <div id="tab-workouts" class="tab-content">
+            <button class="btn btn-outline" style="margin-bottom:12px; width:auto; padding:6px 12px; font-size:12px;" onclick="switchTab('home')">← На главную</button>
+
+            <div class="card hero-card" style="background:#ccfbf1;">
+                <h2 style="color:#0f766e;">Хотите тренироваться правильно?</h2>
+                <p style="color:#115e59;">
+                    Перейдите в Smart GYM — приложение с тренировками и рекомендациями для занятий.
+                </p>
+            </div>
+
+            <div class="card" style="background:#0f766e; color:#ffffff;">
+                <h3 style="font-size:18px; margin-bottom:6px;">Smart GYM Fitness Bot</h3>
+                <p style="font-size:13px; opacity:0.9; margin-bottom:14px;">Интерактивный помощник для занятий в зале и дома.</p>
+                <button class="btn" style="background:#ffffff; color:#0f766e;" onclick="openLinkModal('https://t.me/Smart_GYM_fitness_bot', 'Перейти в Smart GYM Bot')">
+                    Перейти в Smart GYM 🏃
+                </button>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Bottom Navigation -->
+    <nav class="bottom-nav">
+        <button class="nav-item active" onclick="switchTab('home')">
+            <span class="nav-icon">🏠</span>
+            <span>Главная</span>
+        </button>
+        <button class="nav-item" onclick="switchTab('weightloss')">
+            <span class="nav-icon">🏋️</span>
+            <span>Похудение</span>
+        </button>
+        <button class="nav-item" onclick="switchTab('calculator')">
+            <span class="nav-icon">🧮</span>
+            <span>Калории</span>
+        </button>
+        <button class="nav-item" onclick="switchTab('medications')">
+            <span class="nav-icon">💊</span>
+            <span>Препараты</span>
+        </button>
+        <button class="nav-item" onclick="switchTab('peptides')">
+            <span class="nav-icon">🧪</span>
+            <span>Пептиды</span>
+        </button>
+        <button class="nav-item" onclick="switchTab('consultation')">
+            <span class="nav-icon">💬</span>
+            <span>Консультация</span>
+        </button>
+        <button class="nav-item" onclick="switchTab('workouts')">
+            <span class="nav-icon">🏃</span>
+            <span>Smart GYM</span>
+        </button>
+    </nav>
+
+    <!-- Link Confirmation Modal -->
+    <div id="link-modal" class="modal-overlay">
+        <div class="modal-box">
+            <h3 id="modal-title">Переход по ссылке</h3>
+            <p id="modal-warning" style="display:none; color:#b45309; font-weight:600;"></p>
+            <p>Вы открываете внешний ресурс:<br><strong id="modal-url" style="color:var(--primary-color);"></strong></p>
+            <div class="modal-buttons">
+                <button class="btn btn-outline" onclick="closeLinkModal()">Отмена</button>
+                <button class="btn btn-primary" onclick="confirmOpenLink()">Перейти</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Init Telegram Web App
+        if (window.Telegram && window.Telegram.WebApp) {
+            window.Telegram.WebApp.ready();
+            window.Telegram.WebApp.expand();
+        }
+
+        let currentGender = 'female';
+        let pendingTargetUrl = '';
+
+        function setGender(g) {
+            currentGender = g;
+            document.getElementById('g-female').classList.toggle('active', g === 'female');
+            document.getElementById('g-male').classList.toggle('active', g === 'male');
+            calculateInAppCalories();
+        }
+
+        function calculateInAppCalories() {
+            const age = parseFloat(document.getElementById('calc-age').value) || 30;
+            const weight = parseFloat(document.getElementById('calc-weight').value) || 65;
+            const height = parseFloat(document.getElementById('calc-height').value) || 168;
+            const actFactor = parseFloat(document.getElementById('calc-activity').value) || 1.55;
+            const goalMult = parseFloat(document.getElementById('calc-goal').value) || 0.85;
+
+            let bmr = 0;
+            if (currentGender === 'male') {
+                bmr = (10 * weight) + (6.25 * height) - (5 * age) + 5;
+            } else {
+                bmr = (10 * weight) + (6.25 * height) - (5 * age) - 161;
+            }
+
+            const tdee = bmr * actFactor;
+            const target = tdee * goalMult;
+
+            const protGrams = Math.round(weight * 1.8);
+            const protKcal = protGrams * 4;
+
+            const fatGrams = Math.round(weight * 1.0);
+            const fatKcal = fatGrams * 9;
+
+            const remKcal = Math.max(0, target - protKcal - fatKcal);
+            const carbGrams = Math.round(remKcal / 4);
+            const carbKcal = carbGrams * 4;
+
+            document.getElementById('res-target').innerText = Math.round(target) + ' ккал/день';
+            document.getElementById('res-bmr').innerText = Math.round(bmr) + ' ккал';
+            document.getElementById('res-tdee').innerText = Math.round(tdee) + ' ккал';
+
+            document.getElementById('res-prot').innerText = protGrams + ' г';
+            document.getElementById('res-prot-k').innerText = protKcal + ' ккал';
+
+            document.getElementById('res-fat').innerText = fatGrams + ' г';
+            document.getElementById('res-fat-k').innerText = fatKcal + ' ккал';
+
+            document.getElementById('res-carb').innerText = carbGrams + ' г';
+            document.getElementById('res-carb-k').innerText = carbKcal + ' ккал';
+        }
+
+        function calculatePeptides() {
+            const vialMg = parseFloat(document.getElementById('pep-vial').value) || 10;
+            const waterMl = parseFloat(document.getElementById('pep-water').value) || 2;
+            const doseMg = parseFloat(document.getElementById('pep-dose').value) || 2;
+            const syringeUnitsPerMl = parseFloat(document.getElementById('pep-syringe').value) || 100;
+
+            const concentration = waterMl > 0 ? (vialMg / waterMl) : 0; // mg/ml
+            const volNeededMl = concentration > 0 ? (doseMg / concentration) : 0;
+            const units = volNeededMl * syringeUnitsPerMl;
+
+            document.getElementById('pep-res-units').innerText = (units.toFixed(1)) + ' Единиц (Units)';
+            document.getElementById('pep-res-vol').innerText = 'Объём раствора: ' + volNeededMl.toFixed(3) + ' мл';
+            document.getElementById('pep-res-conc').innerText = concentration.toFixed(1) + ' мг/мл';
+            document.getElementById('pep-res-type').innerText = syringeUnitsPerMl === 100 ? 'U-100' : 'U-40';
+        }
+
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+
+            const target = document.getElementById('tab-' + tabId);
+            if (target) target.classList.add('active');
+
+            if (tabId === 'calculator') {
+                calculateInAppCalories();
+            } else if (tabId === 'peptides') {
+                calculatePeptides();
+            }
+
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function openLinkModal(url, title, warningText) {
+            pendingTargetUrl = url;
+            document.getElementById('modal-title').innerText = title || 'Переход по внешней ссылке';
+            document.getElementById('modal-url').innerText = url;
+
+            const warnEl = document.getElementById('modal-warning');
+            if (warningText) {
+                warnEl.innerText = warningText;
+                warnEl.style.display = 'block';
+            } else {
+                warnEl.style.display = 'none';
+            }
+
+            document.getElementById('link-modal').classList.add('active');
+        }
+
+        function closeLinkModal() {
+            document.getElementById('link-modal').classList.remove('active');
+            pendingTargetUrl = '';
+        }
+
+        function confirmOpenLink() {
+            if (pendingTargetUrl) {
+                if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.openLink) {
+                    window.Telegram.WebApp.openLink(pendingTargetUrl);
+                } else {
+                    window.open(pendingTargetUrl, '_blank');
+                }
+            }
+            closeLinkModal();
+        }
+
+        // Run calculation on initial load
+        calculateInAppCalories();
+        calculatePeptides();
+    </script>
+</body>
+</html>
